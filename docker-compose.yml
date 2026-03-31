@@ -1,0 +1,52 @@
+# Versión del formato de docker-compose
+version: '3.8'
+
+services:
+  # Nombre del servicio (puedes llamarlo como quieras)
+  mysql:
+    # Imagen oficial de MySQL versión 8
+    image: mysql:8.0.33
+    platform: linux/amd64
+    # Reinicia el contenedor automáticamente si se cae
+    restart: always
+    environment:
+      # Base de datos que se crea automáticamente
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: tareas_db
+      MYSQL_USER: mau
+      MYSQL_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # Guarda los datos de la BD en un volumen (persistencia)
+      # Evita que se borren al eliminar el contenedor
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      # Se asegura que MySQL arranque primero
+      - mysql
+
+  backend:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    depends_on:
+      # Se asegura que MySQL arranque primero
+      - mysql
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=mysql
+      - DB_USER=mau
+      - DB_PASSWORD=root
+      - DB_NAME=tareas_db
+    volumes:
+      - ./backend:/app
+
+volumes:
+  # Definición del volumen nombrado
+  mysql_data:
