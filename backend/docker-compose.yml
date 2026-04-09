@@ -11,10 +11,10 @@ services:
     restart: always
     environment:
       # Base de datos que se crea automáticamente
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: tareas_db
-      MYSQL_USER: mau
-      MYSQL_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3307:3306"
     volumes:
@@ -32,20 +32,16 @@ services:
       - mysql
 
   backend:
-    build: ./backend
+    build: ./
     ports:
       - "3000:3000"
     depends_on:
       # Se asegura que MySQL arranque primero
       - mysql
-    environment:
-      - NODE_ENV=development
-      - DB_HOST=mysql
-      - DB_USER=mau
-      - DB_PASSWORD=root
-      - DB_NAME=tareas_db
+    env_file:
+      - .env.test
     volumes:
-      - ./backend:/app
+      - ./:/app
 
 volumes:
   # Definición del volumen nombrado
